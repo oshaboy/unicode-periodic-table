@@ -1,4 +1,4 @@
-from os import path, listdir
+from os import path, listdir, mkdir
 from sys import stderr
 from PIL import Image, ImageDraw, ImageFont
 import unicodedataplus as unicodedata
@@ -115,7 +115,7 @@ find_font.memoized_font_name=None
 find_font.memoized_font_ttf=None
 
 
-def generate_image_for_codepoint(codepoint_num : int, puafont_name : str | None):
+def generate_image_for_codepoint(codepoint_num : int, puafont_name : str | None, generate_fontless : bool = True):
 	codepoint = chr(codepoint_num)
 	category = unicodedata.category(codepoint)
 	image=Image.new("RGB", (WIDTH,HEIGHT), (255,255,255))
@@ -201,6 +201,8 @@ def generate_image_for_codepoint(codepoint_num : int, puafont_name : str | None)
 				log_and_print(
 					"{} ({}) is not supported by any font".format(format_codepoint(codepoint_num), unicodedata.name(codepoint))
 				)
+				if not generate_fontless:
+					return None
 
 	#Draw Codepoint number at the bottom 
 	ctx.text(
@@ -241,7 +243,9 @@ if __name__=="__main__":
 	argparser.add_argument("-r","--range",help="Enter Range as [hex]-[hex]")
 	argparser.add_argument("--puafont", help="Font to use for private use area characters")
 	args = argparser.parse_args()
-	range_match=re.match(r"(\d+)-(\d+)",args.range)
+	range_match=None
+	if (args.range != None):
+		range_match=re.match(r"(\d+)-(\d+)",args.range)
 
 	if (range_match):
 		start=int(range_match[1],16)
@@ -253,14 +257,15 @@ if __name__=="__main__":
 		puafont_name=args.puafont
 	else:
 		puafont_name=None
-	os.mkdir("codepoint_images")
-	if (start < 0 or start > end or end >= 0x110000 ):
+	if (not path.isdir("codepoint_images")):
+		mkdir("codepoint_images")
+	if (start < 0 or start > end or end > 0x110000 ):
 		print("Range Error");
 		exit(1)
-	for codepoint_num in range(0,0x110000):
+	for codepoint_num in range(start,end):
 		codepoint=chr(codepoint_num)
 		category=unicodedata.category(codepoint)
-		image=generate_image_for_codepoint(codepoint_num, puafont_name=puafont_name)
+		image=generate_image_for_codepoint(codepoint_num, puafont_name=puafont_name, generate_fontless=False)
 		if (image != None):
 			print(f"codepoint_images/D+{codepoint_num:07}.png")
 			image.save(f"codepoint_images/D+{codepoint_num:07}.png")
