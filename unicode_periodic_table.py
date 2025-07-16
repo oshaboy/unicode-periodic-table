@@ -90,15 +90,15 @@ has_font.memoized_font_ttf=None
 
 def find_font(codepoint_num : int) -> ImageFont.FreeTypeFont | None:
 	#Fast Track for CJK Plane
-	if (codepoint_num >= 0x20000 and codepoint_num <= 0x3ffff):
-		candidate_font = TTFont(path.join('fonts',"NotoSansCJKsc-Medium.otf"))
-		if (has_glyph(candidate_font, codepoint_num)):
-			candidate_font_imagefont=create_imagefont(chr(codepoint_num),path.join('fonts',"NotoSansCJKsc-Medium.otf"))
-			find_font.memoized_font_name="NotoSansCJKsc-Medium.otf"
-			find_font.memoized_font_ttf=candidate_font
-			return candidate_font_imagefont
-		else: 
-			return None
+	# if (codepoint_num >= 0x20000 and codepoint_num <= 0x3ffff):
+	# 	candidate_font = TTFont(path.join('fonts',"NotoSansCJKsc-Medium.otf"))
+	# 	if (has_glyph(candidate_font, codepoint_num)):
+	# 		candidate_font_imagefont=create_imagefont(chr(codepoint_num),path.join('fonts',"NotoSansCJKsc-Medium.otf"))
+	# 		find_font.memoized_font_name="NotoSansCJKsc-Medium.otf"
+	# 		find_font.memoized_font_ttf=candidate_font
+	# 		return candidate_font_imagefont
+	# 	else: 
+	# 		return None
 	if (
 		(find_font.memoized_font_ttf != None) and
 		has_glyph(find_font.memoized_font_ttf, codepoint_num)
