@@ -179,13 +179,12 @@ def generate_image_for_codepoint(codepoint_num : int, puafont_name : str | None,
 		case _:
 			
 			if category == 'Co':
+				fill=(100,50,127) 
 				if (puafont_name != None):
-					# Private Use Area Codepoints are drawn in Purple using Nerd Font
-					# Maybe I should replace it with Fairfax HD
-					fill=(100,50,127) 
+					# Private Use Area Codepoints are drawn in Purple using The PUA font if specified
 					codepoint_font=create_imagefont(codepoint,puafont_name)
 				else:
-					return None
+					codepoint_font=find_font(codepoint_num)
 			else:
 				# Otherwise it's a dark gray
 				fill=(50,50,50)
@@ -198,9 +197,9 @@ def generate_image_for_codepoint(codepoint_num : int, puafont_name : str | None,
 					codepoint, fill=fill, font=codepoint_font, anchor="mb"
 				)
 			else:
-				log_and_print(
-					"{} ({}) is not supported by any font".format(format_codepoint(codepoint_num), unicodedata.name(codepoint))
-				)
+				#log_and_print(
+				#	"{} ({}) is not supported by any font".format(format_codepoint(codepoint_num), unicodedata.name(codepoint))
+				#)
 				if not generate_fontless:
 					return None
 
@@ -242,10 +241,11 @@ if __name__=="__main__":
 	argparser = argparse.ArgumentParser(prog='unicode_periodic_table.py')
 	argparser.add_argument("-r","--range",help="Enter Range as [hex]-[hex]")
 	argparser.add_argument("--puafont", help="Font to use for private use area characters")
+	argparser.add_argument("--generate_fontless", action=argparse.BooleanOptionalAction, help="Generate Images even if the font is missing characters")
 	args = argparser.parse_args()
 	range_match=None
 	if (args.range != None):
-		range_match=re.match(r"(\d+)-(\d+)",args.range)
+		range_match=re.match(r"([0-9a-fA-F]+)-([0-9a-fA-F]+)",args.range)
 
 	if (range_match):
 		start=int(range_match[1],16)
@@ -265,7 +265,7 @@ if __name__=="__main__":
 	for codepoint_num in range(start,end):
 		codepoint=chr(codepoint_num)
 		category=unicodedata.category(codepoint)
-		image=generate_image_for_codepoint(codepoint_num, puafont_name=puafont_name, generate_fontless=False)
+		image=generate_image_for_codepoint(codepoint_num, puafont_name=puafont_name, generate_fontless=args.generate_fontless)
 		if (image != None):
 			print(f"codepoint_images/D+{codepoint_num:07}.png")
 			image.save(f"codepoint_images/D+{codepoint_num:07}.png")
